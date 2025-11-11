@@ -1,0 +1,1958 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>نظام تحليل لغة الجسد | Body Language Analysis System</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+         :root {
+            --primary-color: #4361ee;
+            --primary-dark: #3a0ca3;
+            --primary-light: #4895ef;
+            --secondary-color: #f72585;
+            --accent-color: #4cc9f0;
+            --success-color: #4ade80;
+            --warning-color: #f59e0b;
+            --error-color: #ef4444;
+            --dark-color: #1e1e2e;
+            --darker-color: #121212;
+            --light-color: #f8f9fa;
+            --gray-color: #6c757d;
+            --border-color: #e2e8f0;
+            --shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+            --shadow-lg: 0 10px 40px rgba(0, 0, 0, 0.15);
+            --gradient: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
+            --gradient-secondary: linear-gradient(135deg, var(--secondary-color) 0%, #b5179e 100%);
+            --transition: all 0.3s ease;
+            --border-radius: 12px;
+            --border-radius-lg: 20px;
+        }
+        
+        .dark-theme {
+            --primary-color: #4cc9f0;
+            --primary-dark: #4895ef;
+            --primary-light: #4361ee;
+            --secondary-color: #f72585;
+            --accent-color: #3a0ca3;
+            --success-color: #4ade80;
+            --warning-color: #f59e0b;
+            --error-color: #ef4444;
+            --dark-color: #f8f9fa;
+            --darker-color: #121212;
+            --light-color: #1e1e2e;
+            --gray-color: #a1a1aa;
+            --border-color: #2d2d3a;
+            --shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+            --shadow-lg: 0 10px 40px rgba(0, 0, 0, 0.4);
+            --gradient: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-light) 100%);
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        html {
+            scroll-behavior: smooth;
+        }
+        
+        body {
+            font-family: 'Segoe UI', 'Tahoma', 'Geneva', 'Verdana', sans-serif;
+            background-color: var(--light-color);
+            color: var(--dark-color);
+            line-height: 1.6;
+            transition: var(--transition);
+            overflow-x: hidden;
+        }
+        
+        [dir="ltr"] {
+            direction: ltr;
+            text-align: left;
+        }
+        
+        [dir="rtl"] {
+            direction: rtl;
+            text-align: right;
+        }
+        
+        .container {
+            width: 90%;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+        
+        .section {
+            padding: 100px 0;
+        }
+        
+        .section-title {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            color: var(--primary-color);
+            position: relative;
+            display: inline-block;
+        }
+        
+        .section-title::after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            width: 80px;
+            height: 4px;
+            background: var(--gradient);
+            border-radius: 2px;
+        }
+        
+        [dir="ltr"] .section-title::after {
+            left: 0;
+        }
+        
+        [dir="rtl"] .section-title::after {
+            right: 0;
+        }
+        
+        .section-subtitle {
+            font-size: 1.2rem;
+            color: var(--gray-color);
+            max-width: 700px;
+            margin-bottom: 3rem;
+        }
+        
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            padding: 12px 30px;
+            border-radius: var(--border-radius);
+            font-weight: 600;
+            text-decoration: none;
+            cursor: pointer;
+            transition: var(--transition);
+            border: none;
+            font-size: 1rem;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .btn-primary {
+            background: var(--gradient);
+            color: white;
+            box-shadow: 0 4px 15px rgba(67, 97, 238, 0.3);
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(67, 97, 238, 0.4);
+        }
+        
+        .btn-secondary {
+            background: var(--gradient-secondary);
+            color: white;
+            box-shadow: 0 4px 15px rgba(247, 37, 133, 0.3);
+        }
+        
+        .btn-secondary:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(247, 37, 133, 0.4);
+        }
+        
+        .btn-outline {
+            background: transparent;
+            color: var(--primary-color);
+            border: 2px solid var(--primary-color);
+        }
+        
+        .btn-outline:hover {
+            background: var(--primary-color);
+            color: white;
+        }
+        
+        header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            background-color: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            box-shadow: var(--shadow);
+            z-index: 1000;
+            transition: var(--transition);
+        }
+        
+        .dark-theme header {
+            background-color: rgba(30, 30, 46, 0.95);
+        }
+        
+        .header-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 0;
+        }
+        
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: var(--primary-color);
+            text-decoration: none;
+        }
+        
+        .logo i {
+            font-size: 2rem;
+        }
+        
+        .nav-links {
+            display: flex;
+            gap: 30px;
+        }
+        
+        .nav-links a {
+            text-decoration: none;
+            color: var(--dark-color);
+            font-weight: 500;
+            transition: var(--transition);
+            position: relative;
+        }
+        
+        .nav-links a:hover {
+            color: var(--primary-color);
+        }
+        
+        .nav-links a::after {
+            content: '';
+            position: absolute;
+            bottom: -5px;
+            width: 0;
+            height: 2px;
+            background: var(--gradient);
+            transition: var(--transition);
+        }
+        
+        [dir="ltr"] .nav-links a::after {
+            left: 0;
+        }
+        
+        [dir="rtl"] .nav-links a::after {
+            right: 0;
+        }
+        
+        .nav-links a:hover::after {
+            width: 100%;
+        }
+        
+        .header-controls {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+        }
+        
+        .theme-toggle,
+        .lang-toggle {
+            background: var(--light-color);
+            border: 1px solid var(--border-color);
+            color: var(--dark-color);
+            padding: 10px 15px;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-weight: 500;
+        }
+        
+        .theme-toggle:hover,
+        .lang-toggle:hover {
+            background-color: var(--primary-color);
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: var(--shadow);
+        }
+        
+        .mobile-menu-btn {
+            display: none;
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            color: var(--dark-color);
+            cursor: pointer;
+        }
+        
+        .hero {
+            padding: 180px 0 100px;
+            background: var(--gradient);
+            color: white;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 100" fill="%23ffffff" opacity="0.1"><polygon points="1000,100 1000,0 0,100"></polygon></svg>');
+            background-size: cover;
+        }
+        
+        .hero-content {
+            max-width: 800px;
+            margin: 0 auto;
+            text-align: center;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .hero-title {
+            font-size: 3.5rem;
+            font-weight: 800;
+            margin-bottom: 1.5rem;
+            line-height: 1.2;
+        }
+        
+        .hero-subtitle {
+            font-size: 1.3rem;
+            margin-bottom: 2.5rem;
+            opacity: 0.9;
+            line-height: 1.6;
+        }
+        
+        .hero-buttons {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        
+        .hero-stats {
+            display: flex;
+            justify-content: center;
+            gap: 50px;
+            margin-top: 80px;
+            flex-wrap: wrap;
+        }
+        
+        .stat-item {
+            text-align: center;
+        }
+        
+        .stat-value {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 5px;
+        }
+        
+        .stat-label {
+            font-size: 1rem;
+            opacity: 0.9;
+        }
+        
+        .features {
+            background-color: var(--light-color);
+        }
+        
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+        }
+        
+        .feature-card {
+            background-color: var(--light-color);
+            border-radius: var(--border-radius-lg);
+            padding: 40px 30px;
+            box-shadow: var(--shadow);
+            transition: var(--transition);
+            border: 1px solid var(--border-color);
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .feature-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: var(--gradient);
+        }
+        
+        .feature-card:hover {
+            transform: translateY(-10px);
+            box-shadow: var(--shadow-lg);
+        }
+        
+        .feature-icon {
+            width: 80px;
+            height: 80px;
+            background: var(--gradient);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 25px;
+            color: white;
+            font-size: 2rem;
+        }
+        
+        .feature-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 15px;
+            color: var(--primary-color);
+        }
+        
+        .feature-description {
+            color: var(--gray-color);
+            line-height: 1.7;
+        }
+        
+        .demo {
+            background-color: var(--light-color);
+        }
+        
+        .demo-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 50px;
+            align-items: center;
+        }
+        
+        .video-container {
+            width: 100%;
+            height: 450px;
+            background-color: var(--light-color);
+            border-radius: var(--border-radius-lg);
+            box-shadow: var(--shadow-lg);
+            border: 1px solid var(--border-color);
+            overflow: hidden;
+            position: relative;
+        }
+        
+        .video-feed {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: var(--border-radius-lg);
+        }
+        
+        .video-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            border-radius: var(--border-radius-lg);
+            transition: var(--transition);
+            padding: 20px;
+            text-align: center;
+        }
+        
+        .video-overlay.hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+        
+        .camera-controls {
+            display: flex;
+            gap: 15px;
+            margin-top: 20px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        
+        .stats-container {
+            display: flex;
+            flex-direction: column;
+            gap: 25px;
+        }
+        
+        .stat-card {
+            background-color: var(--light-color);
+            padding: 25px;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border-color);
+            transition: var(--transition);
+        }
+        
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--shadow-lg);
+        }
+        
+        .stat-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        
+        .stat-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--primary-color);
+        }
+        
+        .stat-value {
+            font-size: 1.8rem;
+            font-weight: 700;
+        }
+        
+        .stat-bar {
+            height: 10px;
+            background-color: var(--border-color);
+            border-radius: 5px;
+            overflow: hidden;
+            margin-top: 10px;
+        }
+        
+        .stat-progress {
+            height: 100%;
+            border-radius: 5px;
+            transition: width 1s ease-in-out;
+        }
+        
+        .emotion-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            margin-top: 20px;
+        }
+        
+        .emotion-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px;
+            background: rgba(67, 97, 238, 0.1);
+            border-radius: 8px;
+        }
+        
+        .emotion-color {
+            width: 15px;
+            height: 15px;
+            border-radius: 50%;
+        }
+        
+        .emotion-label {
+            font-size: 0.9rem;
+        }
+        
+        .analytics-section {
+            background-color: var(--light-color);
+            padding: 80px 0;
+        }
+        
+        .analytics-tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+        }
+        
+        .analytics-tab {
+            padding: 12px 24px;
+            background: var(--light-color);
+            border: 1px solid var(--border-color);
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            transition: var(--transition);
+            font-weight: 500;
+        }
+        
+        .analytics-tab.active {
+            background: var(--gradient);
+            color: white;
+            border-color: var(--primary-color);
+        }
+        
+        .analytics-content {
+            display: none;
+        }
+        
+        .analytics-content.active {
+            display: block;
+        }
+        
+        .chart-container {
+            background: var(--light-color);
+            border-radius: var(--border-radius);
+            padding: 30px;
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border-color);
+            margin-bottom: 30px;
+            height: 400px;
+        }
+        
+        .applications {
+            background: var(--darker-color);
+            color: white;
+        }
+        
+        .applications .section-title {
+            color: var(--accent-color);
+        }
+        
+        .applications-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+        }
+        
+        .application-card {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: var(--border-radius);
+            padding: 30px;
+            transition: var(--transition);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .application-card:hover {
+            transform: translateY(-5px);
+            background: rgba(255, 255, 255, 0.1);
+        }
+        
+        .application-icon {
+            font-size: 2.5rem;
+            margin-bottom: 20px;
+            color: var(--accent-color);
+        }
+        
+        .application-title {
+            font-size: 1.3rem;
+            font-weight: 600;
+            margin-bottom: 15px;
+        }
+        
+        .application-description {
+            color: rgba(255, 255, 255, 0.7);
+            line-height: 1.7;
+        }
+        
+        .technologies {
+            background-color: var(--light-color);
+        }
+        
+        .tech-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 30px;
+        }
+        
+        .tech-card {
+            background-color: var(--light-color);
+            border-radius: var(--border-radius);
+            padding: 30px 20px;
+            box-shadow: var(--shadow);
+            transition: var(--transition);
+            text-align: center;
+            border: 1px solid var(--border-color);
+        }
+        
+        .tech-card:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--shadow-lg);
+        }
+        
+        .tech-icon {
+            font-size: 3rem;
+            margin-bottom: 20px;
+            color: var(--primary-color);
+        }
+        
+        .tech-name {
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-bottom: 10px;
+        }
+        
+        .tech-description {
+            color: var(--gray-color);
+            font-size: 0.9rem;
+        }
+        
+        .cta {
+            background: var(--gradient);
+            color: white;
+            text-align: center;
+            padding: 100px 0;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .cta::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 100" fill="%23ffffff" opacity="0.1"><polygon points="0,0 1000,100 1000,0"></polygon></svg>');
+            background-size: cover;
+        }
+        
+        .cta-content {
+            max-width: 800px;
+            margin: 0 auto;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .cta-title {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 1.5rem;
+        }
+        
+        .cta-description {
+            font-size: 1.2rem;
+            margin-bottom: 2.5rem;
+            opacity: 0.9;
+        }
+        
+        footer {
+            background: var(--darker-color);
+            color: white;
+            padding: 80px 0 30px;
+        }
+        
+        .footer-content {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 40px;
+            margin-bottom: 50px;
+        }
+        
+        .footer-column h3 {
+            font-size: 1.3rem;
+            margin-bottom: 25px;
+            color: var(--accent-color);
+            position: relative;
+            display: inline-block;
+        }
+        
+        .footer-column h3::after {
+            content: '';
+            position: absolute;
+            bottom: -8px;
+            width: 40px;
+            height: 3px;
+            background: var(--accent-color);
+        }
+        
+        [dir="ltr"] .footer-column h3::after {
+            left: 0;
+        }
+        
+        [dir="rtl"] .footer-column h3::after {
+            right: 0;
+        }
+        
+        .footer-links {
+            list-style: none;
+        }
+        
+        .footer-links li {
+            margin-bottom: 12px;
+        }
+        
+        .footer-links a {
+            color: rgba(255, 255, 255, 0.7);
+            text-decoration: none;
+            transition: var(--transition);
+        }
+        
+        .footer-links a:hover {
+            color: var(--accent-color);
+            padding-left: 5px;
+        }
+        
+        [dir="rtl"] .footer-links a:hover {
+            padding-left: 0;
+            padding-right: 5px;
+        }
+        
+        .social-links {
+            display: flex;
+            gap: 15px;
+            margin-top: 20px;
+        }
+        
+        .social-link {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            text-decoration: none;
+            transition: var(--transition);
+        }
+        
+        .social-link:hover {
+            background: var(--accent-color);
+            transform: translateY(-3px);
+        }
+        
+        .footer-bottom {
+            text-align: center;
+            padding-top: 30px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 0.9rem;
+        }
+        
+        @media (max-width: 1024px) {
+            .hero-title {
+                font-size: 3rem;
+            }
+            .demo-container {
+                grid-template-columns: 1fr;
+                gap: 40px;
+            }
+            .video-container {
+                height: 400px;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .nav-links {
+                display: none;
+            }
+            .mobile-menu-btn {
+                display: block;
+            }
+            .hero-title {
+                font-size: 2.5rem;
+            }
+            .hero-subtitle {
+                font-size: 1.1rem;
+            }
+            .section-title {
+                font-size: 2rem;
+            }
+            .hero-buttons {
+                flex-direction: column;
+                align-items: center;
+            }
+            .hero-stats {
+                gap: 30px;
+            }
+            .stat-value {
+                font-size: 2rem;
+            }
+        }
+        
+        @media (max-width: 576px) {
+            .hero {
+                padding: 150px 0 80px;
+            }
+            .hero-title {
+                font-size: 2rem;
+            }
+            .section {
+                padding: 80px 0;
+            }
+            .feature-card,
+            .application-card,
+            .tech-card {
+                padding: 25px 20px;
+            }
+            .video-container {
+                height: 300px;
+            }
+        }
+        
+        @keyframes pulse {
+            0% {
+                transform: scale(1);
+            }
+            50% {
+                transform: scale(1.05);
+            }
+            100% {
+                transform: scale(1);
+            }
+        }
+        
+        .pulse {
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+        
+        .loading {
+            animation: spin 1s linear infinite;
+        }
+        
+        .nav-links a.active {
+            color: var(--primary-color);
+        }
+        
+        .nav-links a.active::after {
+            width: 100%;
+        }
+        
+        .page-section {
+            display: none;
+        }
+        
+        .page-section.active {
+            display: block;
+        }
+    </style>
+</head>
+
+<body>
+    <header>
+        <div class="container header-container">
+            <a href="#" class="logo">
+                <i class="fas fa-people-arrows"></i>
+                <span data-en="Body Language Analysis" data-ar="نظام تحليل لغة الجسد">نظام تحليل لغة الجسد</span>
+            </a>
+
+            <nav class="nav-links">
+                <a href="#home" class="nav-link active" data-section="home" data-en="Home" data-ar="الرئيسية">الرئيسية</a>
+                <a href="#features" class="nav-link" data-section="features" data-en="Features" data-ar="المميزات">المميزات</a>
+                <a href="#demo" class="nav-link" data-section="demo" data-en="Demo" data-ar="التجربة">التجربة</a>
+                <a href="#analytics" class="nav-link" data-section="analytics" data-en="Analytics" data-ar="التحليلات">التحليلات</a>
+                <a href="#applications" class="nav-link" data-section="applications" data-en="Applications" data-ar="التطبيقات">التطبيقات</a>
+                <a href="#technologies" class="nav-link" data-section="technologies" data-en="Technologies" data-ar="التقنيات">التقنيات</a>
+            </nav>
+
+            <div class="header-controls">
+                <button class="theme-toggle">
+                    <i class="fas fa-moon"></i>
+                    <span data-en="Dark Mode" data-ar="الوضع الداكن">الوضع الداكن</span>
+                </button>
+                <button class="lang-toggle">
+                    <i class="fas fa-language"></i>
+                    <span data-en="English" data-ar="English">English</span>
+                </button>
+                <button class="mobile-menu-btn">
+                    <i class="fas fa-bars"></i>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <main>
+        <!-- Home Section -->
+        <section id="home" class="page-section active">
+            <div class="hero">
+                <div class="container hero-content">
+                    <h1 class="hero-title" data-en="SOFT12" data-ar="SOFT12">SOFT12</h1>
+                    <h2 class="hero-title" data-en="Body Language Analysis System" data-ar="نظام تحليل لغة الجسد">نظام تحليل لغة الجسد</h2>
+                    <p class="hero-subtitle" data-en="AI-powered real-time detection and interpretation of human gestures, facial expressions, and movements to understand emotions and intentions." data-ar="نظام ذكي يكشف ويترجم إيماءات وتعبيرات الوجه وحركات الإنسان في الوقت الفعلي لفهم المشاعر والنوايا باستخدام الذكاء الاصطناعي.">
+                        نظام ذكي يكشف ويترجم إيماءات وتعبيرات الوجه وحركات الإنسان في الوقت الفعلي لفهم المشاعر والنوايا باستخدام الذكاء الاصطناعي.
+                    </p>
+                    <div class="hero-buttons">
+                        <button class="btn btn-primary" id="startAnalysis">
+                            <i class="fas fa-play-circle"></i>
+                            <span data-en="Start Analysis" data-ar="ابدأ التحليل">ابدأ التحليل</span>
+                        </button>
+                        <button class="btn btn-outline" id="viewDemo">
+                            <i class="fas fa-video"></i>
+                            <span data-en="View Demo" data-ar="عرض التجربة">عرض التجربة</span>
+                        </button>
+                    </div>
+
+                    <div class="hero-stats">
+                        <div class="stat-item">
+                            <div class="stat-value">95%</div>
+                            <div class="stat-label" data-en="Accuracy" data-ar="دقة">دقة</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-value" data-en="Real-time" data-ar="وقت حقيقي">وقت حقيقي</div>
+                            <div class="stat-label" data-en="Analysis" data-ar="تحليل">تحليل</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-value">15+</div>
+                            <div class="stat-label" data-en="Emotions" data-ar="مشاعر">مشاعر</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-value">24/7</div>
+                            <div class="stat-label" data-en="Monitoring" data-ar="مراقبة">مراقبة</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <section class="section features">
+                <div class="container">
+                    <h2 class="section-title" data-en="Key Features" data-ar="المميزات الرئيسية">المميزات الرئيسية</h2>
+                    <p class="section-subtitle" data-en="Our advanced AI system provides comprehensive body language analysis with cutting-edge technology" data-ar="يوفر نظام الذكاء الاصطناعي المتقدم تحليلاً شاملاً للغة الجسد باستخدام أحدث التقنيات">
+                        يوفر نظام الذكاء الاصطناعي المتقدم تحليلاً شاملاً للغة الجسد باستخدام أحدث التقنيات
+                    </p>
+
+                    <div class="features-grid">
+                        <div class="feature-card">
+                            <div class="feature-icon">
+                                <i class="fas fa-video"></i>
+                            </div>
+                            <h3 class="feature-title" data-en="Real-time Analysis" data-ar="تحليل فوري">تحليل فوري</h3>
+                            <p class="feature-description" data-en="Detect body posture and facial expressions in real-time through webcam with advanced AI algorithms." data-ar="اكتشف وضعية الجسم وتعبيرات الوجه في الوقت الفعلي من خلال كاميرا الويب باستخدام خوارزميات الذكاء الاصطناعي المتقدمة.">
+                                اكتشف وضعية الجسم وتعبيرات الوجه في الوقت الفعلي من خلال كاميرا الويب باستخدام خوارزميات الذكاء الاصطناعي المتقدمة.
+                            </p>
+                        </div>
+
+                        <div class="feature-card">
+                            <div class="feature-icon">
+                                <i class="fas fa-smile"></i>
+                            </div>
+                            <h3 class="feature-title" data-en="Emotion Recognition" data-ar="التعرف على المشاعر">التعرف على المشاعر</h3>
+                            <p class="feature-description" data-en="Identify emotional states such as happiness, anger, sadness, fear, and confidence with 95% accuracy." data-ar="تحديد الحالات العاطفية مثل السعادة والغضب والحزن والخوف والثقة بدقة تصل إلى ٩٥٪.">
+                                تحديد الحالات العاطفية مثل السعادة والغضب والحزن والخوف والثقة بدقة تصل إلى ٩٥٪.
+                            </p>
+                        </div>
+
+                        <div class="feature-card">
+                            <div class="feature-icon">
+                                <i class="fas fa-chart-bar"></i>
+                            </div>
+                            <h3 class="feature-title" data-en="Data Visualization" data-ar="تصور البيانات">تصور البيانات</h3>
+                            <p class="feature-description" data-en="View emotion statistics and analysis results through intuitive charts and real-time graphs." data-ar="عرض إحصائيات المشاعر ونتائج التحليل من خلال مخططات ورسوم بيانية بديهية في الوقت الفعلي.">
+                                عرض إحصائيات المشاعر ونتائج التحليل من خلال مخططات ورسوم بيانية بديهية في الوقت الفعلي.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </section>
+
+        <!-- Features Section -->
+        <section id="features" class="page-section">
+            <div class="section features">
+                <div class="container">
+                    <h2 class="section-title" data-en="Advanced Features" data-ar="المميزات المتقدمة">المميزات المتقدمة</h2>
+                    <p class="section-subtitle" data-en="Discover the powerful capabilities of our body language analysis system" data-ar="اكتشف القدرات القوية لنظام تحليل لغة الجسد">
+                        اكتشف القدرات القوية لنظام تحليل لغة الجسد
+                    </p>
+
+                    <div class="features-grid">
+                        <div class="feature-card">
+                            <div class="feature-icon">
+                                <i class="fas fa-brain"></i>
+                            </div>
+                            <h3 class="feature-title" data-en="AI-Powered Insights" data-ar="رؤى بالذكاء الاصطناعي">رؤى بالذكاء الاصطناعي</h3>
+                            <p class="feature-description" data-en="Get deep insights into behavioral patterns and emotional trends with our advanced machine learning models." data-ar="احصل على رؤى عميقة في الأنماط السلوكية والاتجاهات العاطفية باستخدام نماذج التعلم الآلي المتقدمة.">
+                                احصل على رؤى عميقة في الأنماط السلوكية والاتجاهات العاطفية باستخدام نماذج التعلم الآلي المتقدمة.
+                            </p>
+                        </div>
+
+                        <div class="feature-card">
+                            <div class="feature-icon">
+                                <i class="fas fa-history"></i>
+                            </div>
+                            <h3 class="feature-title" data-en="Session Recording" data-ar="تسجيل الجلسات">تسجيل الجلسات</h3>
+                            <p class="feature-description" data-en="Save and analyze recorded sessions for later review and comparative analysis." data-ar="احفظ وحلل الجلسات المسجلة للمراجعة اللاحقة والتحليل المقارن.">
+                                احفظ وحلل الجلسات المسجلة للمراجعة اللاحقة والتحليل المقارن.
+                            </p>
+                        </div>
+
+                        <div class="feature-card">
+                            <div class="feature-icon">
+                                <i class="fas fa-globe"></i>
+                            </div>
+                            <h3 class="feature-title" data-en="Multi-Language Support" data-ar="دعم متعدد اللغات">دعم متعدد اللغات</h3>
+                            <p class="feature-description" data-en="Fully localized interface in English and Arabic with regional emotion recognition optimization." data-ar="واجهة مترجمة بالكامل إلى الإنجليزية والعربية مع تحسين التعرف على المشاعر الإقليمية.">
+                                واجهة مترجمة بالكامل إلى الإنجليزية والعربية مع تحسين التعرف على المشاعر الإقليمية.
+                            </p>
+                        </div>
+
+                        <div class="feature-card">
+                            <div class="feature-icon">
+                                <i class="fas fa-database"></i>
+                            </div>
+                            <h3 class="feature-title" data-en="Data Export" data-ar="تصدير البيانات">تصدير البيانات</h3>
+                            <p class="feature-description" data-en="Export analysis results in multiple formats for further processing and reporting." data-ar="تصدير نتائج التحليل بتنسيقات متعددة لمزيد من المعالجة وإعداد التقارير.">
+                                تصدير نتائج التحليل بتنسيقات متعددة لمزيد من المعالجة وإعداد التقارير.
+                            </p>
+                        </div>
+
+                        <div class="feature-card">
+                            <div class="feature-icon">
+                                <i class="fas fa-user-shield"></i>
+                            </div>
+                            <h3 class="feature-title" data-en="Privacy Focused" data-ar="مراعاة الخصوصية">مراعاة الخصوصية</h3>
+                            <p class="feature-description" data-en="All processing happens locally on your device with optional cloud synchronization." data-ar="تحدث جميع عمليات المعالجة محليًا على جهازك مع مزامنة سحابية اختيارية.">
+                                تحدث جميع عمليات المعالجة محليًا على جهازك مع مزامنة سحابية اختيارية.
+                            </p>
+                        </div>
+
+                        <div class="feature-card">
+                            <div class="feature-icon">
+                                <i class="fas fa-mobile-alt"></i>
+                            </div>
+                            <h3 class="feature-title" data-en="Cross-Platform" data-ar="متعدد المنصات">متعدد المنصات</h3>
+                            <p class="feature-description" data-en="Works seamlessly on desktop, tablet, and mobile devices with responsive design." data-ar="يعمل بسلاسة على أجهزة الكمبيوتر والأجهزة اللوحية والهواتف المحمولة بتصميم متجاوب.">
+                                يعمل بسلاسة على أجهزة الكمبيوتر والأجهزة اللوحية والهواتف المحمولة بتصميم متجاوب.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Demo Section -->
+        <section id="demo" class="page-section">
+            <div class="section demo">
+                <div class="container">
+                    <h2 class="section-title" data-en="Live Analysis Demo" data-ar="تجربة التحليل المباشر">تجربة التحليل المباشر</h2>
+                    <p class="section-subtitle" data-en="Experience our AI system in action. Enable your camera to see real-time body language analysis." data-ar="جرب نظام الذكاء الاصطناعي أثناء العمل. شغّل الكاميرا لرؤية تحليل لغة الجسد في الوقت الفعلي.">
+                        جرب نظام الذكاء الاصطناعي أثناء العمل. شغّل الكاميرا لرؤية تحليل لغة الجسد في الوقت الفعلي.
+                    </p>
+
+                    <div class="demo-container">
+                        <div class="video-container">
+                            <video id="videoFeed" class="video-feed" autoplay playsinline></video>
+                            <div class="video-overlay" id="videoOverlay">
+                                <i class="fas fa-camera fa-3x"></i>
+                                <h3 data-en="Camera Access Required" data-ar="يتطلب الوصول للكاميرا">يتطلب الوصول للكاميرا</h3>
+                                <p data-en="Click 'Start Camera' to begin analysis" data-ar="انقر 'تشغيل الكاميرا' لبدء التحليل">انقر 'تشغيل الكاميرا' لبدء التحليل</p>
+                                <div class="camera-controls">
+                                    <button class="btn btn-primary" id="startCamera">
+                                        <i class="fas fa-play"></i>
+                                        <span data-en="Start Camera" data-ar="تشغيل الكاميرا">تشغيل الكاميرا</span>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="stats-container">
+                            <div class="stat-card">
+                                <div class="stat-header">
+                                    <div class="stat-title" data-en="Current Emotion" data-ar="المشاعر الحالية">المشاعر الحالية</div>
+                                    <div class="stat-value" id="currentEmotion" data-en="Neutral" data-ar="محايد">محايد</div>
+                                </div>
+                                <div class="stat-bar">
+                                    <div class="stat-progress" id="emotionProgress" style="width: 65%; background-color: #4cc9f0;"></div>
+                                </div>
+
+                                <div class="emotion-grid">
+                                    <div class="emotion-item">
+                                        <div class="emotion-color" style="background-color: #4cc9f0;"></div>
+                                        <div class="emotion-label" data-en="Confidence" data-ar="الثقة">الثقة</div>
+                                    </div>
+                                    <div class="emotion-item">
+                                        <div class="emotion-color" style="background-color: #4ade80;"></div>
+                                        <div class="emotion-label" data-en="Happiness" data-ar="السعادة">السعادة</div>
+                                    </div>
+                                    <div class="emotion-item">
+                                        <div class="emotion-color" style="background-color: #f87171;"></div>
+                                        <div class="emotion-label" data-en="Stress" data-ar="التوتر">التوتر</div>
+                                    </div>
+                                    <div class="emotion-item">
+                                        <div class="emotion-color" style="background-color: #a78bfa;"></div>
+                                        <div class="emotion-label" data-en="Focus" data-ar="التركيز">التركيز</div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="stat-card">
+                                <div class="stat-header">
+                                    <div class="stat-title" data-en="Analysis Confidence" data-ar="دقة التحليل">دقة التحليل</div>
+                                    <div class="stat-value">87%</div>
+                                </div>
+                                <div class="stat-bar">
+                                    <div class="stat-progress" style="width: 87%; background-color: #4361ee;"></div>
+                                </div>
+                            </div>
+
+                            <div class="stat-card">
+                                <div class="stat-header">
+                                    <div class="stat-title" data-en="Body Posture" data-ar="وضعية الجسم">وضعية الجسم</div>
+                                    <div class="stat-value" data-en="Open" data-ar="منفتح">منفتح</div>
+                                </div>
+                                <div class="stat-bar">
+                                    <div class="stat-progress" style="width: 72%; background-color: #3a0ca3;"></div>
+                                </div>
+                            </div>
+
+                            <div class="stat-card">
+                                <div class="stat-header">
+                                    <div class="stat-title" data-en="Facial Expressions" data-ar="تعبيرات الوجه">تعبيرات الوجه</div>
+                                    <div class="stat-value" data-en="Neutral" data-ar="محايد">محايد</div>
+                                </div>
+                                <div class="stat-bar">
+                                    <div class="stat-progress" style="width: 45%; background-color: #f72585;"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="camera-controls" style="justify-content: center; margin-top: 30px;">
+                        <button class="btn btn-secondary" id="stopCamera">
+                            <i class="fas fa-stop"></i>
+                            <span data-en="Stop Camera" data-ar="إيقاف الكاميرا">إيقاف الكاميرا</span>
+                        </button>
+                        <button class="btn btn-outline" id="takeSnapshot">
+                            <i class="fas fa-camera-retro"></i>
+                            <span data-en="Take Snapshot" data-ar="التقاط صورة">التقاط صورة</span>
+                        </button>
+                        <button class="btn btn-outline" id="viewAnalyticsBtn">
+                            <i class="fas fa-chart-line"></i>
+                            <span data-en="View Analytics" data-ar="عرض التحليلات">عرض التحليلات</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Analytics Section -->
+        <section id="analytics" class="page-section">
+            <div class="section analytics-section">
+                <div class="container">
+                    <h2 class="section-title" data-en="Advanced Analytics" data-ar="التحليلات المتقدمة">التحليلات المتقدمة</h2>
+                    <p class="section-subtitle" data-en="Deep insights and comprehensive analysis of body language patterns and emotional trends" data-ar="رؤى عميقة وتحليل شامل لأنماط لغة الجسد والاتجاهات العاطفية">
+                        رؤى عميقة وتحليل شامل لأنماط لغة الجسد والاتجاهات العاطفية
+                    </p>
+
+                    <div class="analytics-tabs">
+                        <div class="analytics-tab active" data-tab="emotions">المشاعر</div>
+                        <div class="analytics-tab" data-tab="posture">وضعية الجسم</div>
+                        <div class="analytics-tab" data-tab="expressions">تعبيرات الوجه</div>
+                        <div class="analytics-tab" data-tab="trends">الاتجاهات</div>
+                    </div>
+
+                    <div class="analytics-content active" id="emotions-tab">
+                        <div class="chart-container">
+                            <canvas id="emotionsChart"></canvas>
+                        </div>
+                    </div>
+
+                    <div class="analytics-content" id="posture-tab">
+                        <div class="chart-container">
+                            <canvas id="postureChart"></canvas>
+                        </div>
+                    </div>
+
+                    <div class="analytics-content" id="expressions-tab">
+                        <div class="chart-container">
+                            <canvas id="expressionsChart"></canvas>
+                        </div>
+                    </div>
+
+                    <div class="analytics-content" id="trends-tab">
+                        <div class="chart-container">
+                            <canvas id="trendsChart"></canvas>
+                        </div>
+                    </div>
+
+                    <div class="stats-container" style="margin-top: 40px;">
+                        <div class="stat-card">
+                            <div class="stat-header">
+                                <div class="stat-title" data-en="Session Duration" data-ar="مدة الجلسة">مدة الجلسة</div>
+                                <div class="stat-value">24:36</div>
+                            </div>
+                            <div class="stat-bar">
+                                <div class="stat-progress" style="width: 82%; background-color: #4361ee;"></div>
+                            </div>
+                        </div>
+
+                        <div class="stat-card">
+                            <div class="stat-header">
+                                <div class="stat-title" data-en="Emotion Changes" data-ar="تغيرات المشاعر">تغيرات المشاعر</div>
+                                <div class="stat-value">47</div>
+                            </div>
+                            <div class="stat-bar">
+                                <div class="stat-progress" style="width: 64%; background-color: #f72585;"></div>
+                            </div>
+                        </div>
+
+                        <div class="stat-card">
+                            <div class="stat-header">
+                                <div class="stat-title" data-en="Dominant Emotion" data-ar="المشاعر المسيطرة">المشاعر المسيطرة</div>
+                                <div class="stat-value" data-en="Confidence" data-ar="الثقة">الثقة</div>
+                            </div>
+                            <div class="stat-bar">
+                                <div class="stat-progress" style="width: 78%; background-color: #4cc9f0;"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Applications Section -->
+        <section id="applications" class="page-section">
+            <div class="section applications">
+                <div class="container">
+                    <h2 class="section-title" data-en="Applications" data-ar="مجالات التطبيق">مجالات التطبيق</h2>
+                    <p class="section-subtitle" data-en="Our body language analysis system has diverse applications across multiple industries" data-ar="يتمتع نظام تحليل لغة الجسد بتطبيقات متنوعة عبر صناعات متعددة">
+                        يتمتع نظام تحليل لغة الجسد بتطبيقات متنوعة عبر صناعات متعددة
+                    </p>
+
+                    <div class="applications-grid">
+                        <div class="application-card">
+                            <div class="application-icon">
+                                <i class="fas fa-shield-alt"></i>
+                            </div>
+                            <h3 class="application-title" data-en="Security & Surveillance" data-ar="الأمن والمراقبة">الأمن والمراقبة</h3>
+                            <p class="application-description" data-en="Detect suspicious behavior and potential threats in real-time for enhanced security monitoring." data-ar="اكتشاف السلوك المشبوه والتهديدات المحتملة في الوقت الفعلي لتعزيز المراقبة الأمنية.">
+                                اكتشاف السلوك المشبوه والتهديدات المحتملة في الوقت الفعلي لتعزيز المراقبة الأمنية.
+                            </p>
+                        </div>
+
+                        <div class="application-card">
+                            <div class="application-icon">
+                                <i class="fas fa-headset"></i>
+                            </div>
+                            <h3 class="application-title" data-en="Customer Service" data-ar="خدمة العملاء">خدمة العملاء</h3>
+                            <p class="application-description" data-en="Analyze customer emotions and satisfaction levels to improve service quality and experience." data-ar="تحليل مشاعر العملاء ومستويات الرضا لتحسين جودة الخدمة والتجربة.">
+                                تحليل مشاعر العملاء ومستويات الرضا لتحسين جودة الخدمة والتجربة.
+                            </p>
+                        </div>
+
+                        <div class="application-card">
+                            <div class="application-icon">
+                                <i class="fas fa-user-md"></i>
+                            </div>
+                            <h3 class="application-title" data-en="Psychological Research" data-ar="البحوث النفسية">البحوث النفسية</h3>
+                            <p class="application-description" data-en="Support behavioral studies and psychological research with accurate emotion detection." data-ar="دعم الدراسات السلوكية والبحوث النفسية من خلال الكشف الدقيق عن المشاعر.">
+                                دعم الدراسات السلوكية والبحوث النفسية من خلال الكشف الدقيق عن المشاعر.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Technologies Section -->
+        <section id="technologies" class="page-section">
+            <div class="section technologies">
+                <div class="container">
+                    <h2 class="section-title" data-en="Technologies Used" data-ar="التقنيات المستخدمة">التقنيات المستخدمة</h2>
+                    <p class="section-subtitle" data-en="Our system is built with cutting-edge technologies for accurate and efficient analysis" data-ar="تم بناء نظامنا باستخدام أحدث التقنيات لتحليل دقيق وفعال">
+                        تم بناء نظامنا باستخدام أحدث التقنيات لتحليل دقيق وفعال
+                    </p>
+
+                    <div class="tech-grid">
+                        <div class="tech-card">
+                            <div class="tech-icon">
+                                <i class="fab fa-python"></i>
+                            </div>
+                            <h3 class="tech-name">Python</h3>
+                            <p class="tech-description" data-en="AI model development and backend processing" data-ar="تطوير نماذج الذكاء الاصطناعي ومعالجة الخلفية">تطوير نماذج الذكاء الاصطناعي ومعالجة الخلفية</p>
+                        </div>
+
+                        <div class="tech-card">
+                            <div class="tech-icon">
+                                <i class="fas fa-camera"></i>
+                            </div>
+                            <h3 class="tech-name">OpenCV</h3>
+                            <p class="tech-description" data-en="Image and video processing for real-time analysis" data-ar="معالجة الصور والفيديو للتحليل في الوقت الفعلي">معالجة الصور والفيديو للتحليل في الوقت الفعلي</p>
+                        </div>
+
+                        <div class="tech-card">
+                            <div class="tech-icon">
+                                <i class="fas fa-project-diagram"></i>
+                            </div>
+                            <h3 class="tech-name">MediaPipe</h3>
+                            <p class="tech-description" data-en="Pose estimation and facial landmark detection" data-ar="تقدير الوضعية واكتشاف معالم الوجه">تقدير الوضعية واكتشاف معالم الوجه</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- CTA Section -->
+    <section class="cta">
+        <div class="container cta-content">
+            <h2 class="cta-title" data-en="Ready to Get Started?" data-ar="مستعد للبدء؟">مستعد للبدء؟</h2>
+            <p class="cta-description" data-en="Experience the power of AI-driven body language analysis for your organization" data-ar="جرب قوة تحليل لغة الجسد المدعوم بالذكاء الاصطناعي لمؤسستك">
+                جرب قوة تحليل لغة الجسد المدعوم بالذكاء الاصطناعي لمؤسستك
+            </p>
+            <div class="hero-buttons">
+                <button class="btn btn-secondary">
+                    <i class="fas fa-rocket"></i>
+                    <span data-en="Start Free Trial" data-ar="ابدأ التجربة المجانية">ابدأ التجربة المجانية</span>
+                </button>
+                <button class="btn btn-outline" style="background: rgba(255,255,255,0.1); color: white; border-color: white;">
+                    <i class="fas fa-calendar-alt"></i>
+                    <span data-en="Schedule Demo" data-ar="جدولة عرض">جدولة عرض</span>
+                </button>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-column">
+                    <h3 data-en="Body Language AI" data-ar="ذكاء لغة الجسد">ذكاء لغة الجسد</h3>
+                    <p style="color: rgba(255,255,255,0.7); margin-bottom: 20px;" data-en="Advanced AI-powered body language analysis system for understanding human emotions and intentions." data-ar="نظام متقدم لتحليل لغة الجسد مدعوم بالذكاء الاصطناعي لفهم مشاعر الإنسان ونواياه.">
+                        نظام متقدم لتحليل لغة الجسد مدعوم بالذكاء الاصطناعي لفهم مشاعر الإنسان ونواياه.
+                    </p>
+                    <div class="social-links">
+                        <a href="#" class="social-link"><i class="fab fa-twitter"></i></a>
+                        <a href="#" class="social-link"><i class="fab fa-facebook-f"></i></a>
+                        <a href="#" class="social-link"><i class="fab fa-linkedin-in"></i></a>
+                        <a href="#" class="social-link"><i class="fab fa-github"></i></a>
+                    </div>
+                </div>
+
+                <div class="footer-column">
+                    <h3 data-en="Quick Links" data-ar="روابط سريعة">روابط سريعة</h3>
+                    <ul class="footer-links">
+                        <li><a href="#home" class="footer-nav-link" data-section="home" data-en="Home" data-ar="الرئيسية">الرئيسية</a></li>
+                        <li><a href="#features" class="footer-nav-link" data-section="features" data-en="Features" data-ar="المميزات">المميزات</a></li>
+                        <li><a href="#demo" class="footer-nav-link" data-section="demo" data-en="Demo" data-ar="التجربة">التجربة</a></li>
+                        <li><a href="#analytics" class="footer-nav-link" data-section="analytics" data-en="Analytics" data-ar="التحليلات">التحليلات</a></li>
+                    </ul>
+                </div>
+
+                <div class="footer-column">
+                    <h3 data-en="Resources" data-ar="الموارد">الموارد</h3>
+                    <ul class="footer-links">
+                        <li><a href="#" data-en="Documentation" data-ar="التوثيق">التوثيق</a></li>
+                        <li><a href="#" data-en="API Reference" data-ar="مرجع API">مرجع API</a></li>
+                        <li><a href="#" data-en="Case Studies" data-ar="دراسات الحالة">دراسات الحالة</a></li>
+                        <li><a href="#" data-en="Blog" data-ar="المدونة">المدونة</a></li>
+                    </ul>
+                </div>
+
+                <div class="footer-column">
+                    <h3 data-en="Contact Us" data-ar="اتصل بنا">اتصل بنا</h3>
+                    <ul class="footer-links">
+                        <li><i class="fas fa-envelope" style="margin-left: 5px;"></i> <a href="mailto:isefsoft12@gmail.com">isefsoft12@gmail.com</a></li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="footer-bottom">
+                <p data-en="&copy;  Body Language Analysis System." data-ar="&copy; 2023 نظام تحليل لغة الجسد. جميع الحقوق محفوظة.">
+                    &copy; نظام تحليل لغة الجسد.
+                </p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Global variables
+        let currentLang = 'ar';
+        let stream = null;
+        let emotionInterval = null;
+        let analysisInterval = null;
+        let charts = {};
+
+        // Initialize everything when page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            initNavigation();
+            initCharts();
+            initCamera();
+            loadPreferences();
+            initRealTimeData();
+            initAnalyticsTabs();
+        });
+
+        // Navigation System
+        function initNavigation() {
+            const navLinks = document.querySelectorAll('.nav-link, .footer-nav-link');
+
+            // Set initial active section
+            setActiveSection('home');
+
+            // Add click event listeners to navigation links
+            navLinks.forEach(link => {
+                link.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const targetSection = this.getAttribute('data-section');
+                    setActiveSection(targetSection);
+
+                    // Close mobile menu if open
+                    if (window.innerWidth <= 768) {
+                        document.querySelector('.nav-links').style.display = 'none';
+                    }
+                });
+            });
+
+            // Mobile menu functionality
+            const mobileMenuBtn = document.querySelector('.mobile-menu-btn');
+            const navLinksContainer = document.querySelector('.nav-links');
+
+            if (mobileMenuBtn) {
+                mobileMenuBtn.addEventListener('click', () => {
+                    const isVisible = navLinksContainer.style.display === 'flex';
+                    navLinksContainer.style.display = isVisible ? 'none' : 'flex';
+                });
+            }
+        }
+
+        function setActiveSection(sectionId) {
+            // Hide all sections
+            document.querySelectorAll('.page-section').forEach(section => {
+                section.classList.remove('active');
+            });
+
+            // Remove active class from all nav links
+            document.querySelectorAll('.nav-link').forEach(link => {
+                link.classList.remove('active');
+            });
+
+            // Show target section
+            const targetSection = document.getElementById(sectionId);
+            if (targetSection) {
+                targetSection.classList.add('active');
+
+                // Add active class to corresponding nav link
+                const correspondingLink = document.querySelector(`.nav-link[data-section="${sectionId}"]`);
+                if (correspondingLink) {
+                    correspondingLink.classList.add('active');
+                }
+            }
+        }
+
+        // Chart Initialization
+        function initCharts() {
+            // Emotions Chart
+            const emotionsCtx = document.getElementById('emotionsChart');
+            if (emotionsCtx) {
+                charts.emotionsChart = new Chart(emotionsCtx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: currentLang === 'en' ? ['Confidence', 'Happiness', 'Neutral', 'Focus', 'Stress'] : ['الثقة', 'السعادة', 'محايد', 'التركيز', 'التوتر'],
+                        datasets: [{
+                            data: [30, 25, 20, 15, 10],
+                            backgroundColor: ['#4cc9f0', '#4ade80', '#94a3b8', '#a78bfa', '#f87171'],
+                            borderWidth: 2
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                position: 'bottom'
+                            }
+                        }
+                    }
+                });
+            }
+
+            // Posture Chart
+            const postureCtx = document.getElementById('postureChart');
+            if (postureCtx) {
+                charts.postureChart = new Chart(postureCtx, {
+                    type: 'bar',
+                    data: {
+                        labels: currentLang === 'en' ? ['Open', 'Closed', 'Confident', 'Defensive', 'Relaxed'] : ['منفتح', 'منغلق', 'واثق', 'دفاعي', 'مسترخي'],
+                        datasets: [{
+                            label: currentLang === 'en' ? 'Frequency' : 'التكرار',
+                            data: [45, 20, 60, 15, 30],
+                            backgroundColor: '#4361ee'
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false
+                    }
+                });
+            }
+
+            // Expressions Chart
+            const expressionsCtx = document.getElementById('expressionsChart');
+            if (expressionsCtx) {
+                charts.expressionsChart = new Chart(expressionsCtx, {
+                    type: 'line',
+                    data: {
+                        labels: currentLang === 'en' ? ['9:00', '10:00', '11:00', '12:00', '13:00', '14:00', '15:00'] : ['٩:٠٠', '١٠:٠٠', '١١:٠٠', '١٢:٠٠', '١٣:٠٠', '١٤:٠٠', '١٥:٠٠'],
+                        datasets: [{
+                            label: currentLang === 'en' ? 'Smiling' : 'الابتسام',
+                            data: [65, 59, 80, 81, 56, 55, 40],
+                            borderColor: '#4ade80',
+                            tension: 0.4
+                        }, {
+                            label: currentLang === 'en' ? 'Neutral' : 'محايد',
+                            data: [28, 48, 40, 19, 86, 27, 90],
+                            borderColor: '#94a3b8',
+                            tension: 0.4
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false
+                    }
+                });
+            }
+        }
+
+        // Camera System
+        function initCamera() {
+            const video = document.getElementById('videoFeed');
+            const videoOverlay = document.getElementById('videoOverlay');
+            const startCameraBtn = document.getElementById('startCamera');
+            const stopCameraBtn = document.getElementById('stopCamera');
+            const startAnalysisBtn = document.getElementById('startAnalysis');
+            const viewDemoBtn = document.getElementById('viewDemo');
+            const takeSnapshotBtn = document.getElementById('takeSnapshot');
+            const viewAnalyticsBtn = document.getElementById('viewAnalyticsBtn');
+
+            // Emotions for simulation
+            const emotions = [{
+                name: {
+                    en: "Confidence",
+                    ar: "الثقة"
+                },
+                value: 65,
+                color: "#4cc9f0"
+            }, {
+                name: {
+                    en: "Happiness",
+                    ar: "السعادة"
+                },
+                value: 80,
+                color: "#4ade80"
+            }, {
+                name: {
+                    en: "Neutral",
+                    ar: "محايد"
+                },
+                value: 45,
+                color: "#94a3b8"
+            }, {
+                name: {
+                    en: "Focus",
+                    ar: "التركيز"
+                },
+                value: 75,
+                color: "#a78bfa"
+            }, {
+                name: {
+                    en: "Stress",
+                    ar: "التوتر"
+                },
+                value: 60,
+                color: "#f87171"
+            }];
+
+            // Start camera
+            if (startCameraBtn) {
+                startCameraBtn.addEventListener('click', startCamera);
+            }
+
+            if (startAnalysisBtn) {
+                startAnalysisBtn.addEventListener('click', startCamera);
+            }
+
+            if (viewDemoBtn) {
+                viewDemoBtn.addEventListener('click', () => setActiveSection('demo'));
+            }
+
+            if (viewAnalyticsBtn) {
+                viewAnalyticsBtn.addEventListener('click', () => setActiveSection('analytics'));
+            }
+
+            // Stop camera
+            if (stopCameraBtn) {
+                stopCameraBtn.addEventListener('click', stopCamera);
+            }
+
+            // Take snapshot
+            if (takeSnapshotBtn) {
+                takeSnapshotBtn.addEventListener('click', takeSnapshot);
+            }
+
+            async function startCamera() {
+                try {
+                    stream = await navigator.mediaDevices.getUserMedia({
+                        video: {
+                            width: {
+                                ideal: 1280
+                            },
+                            height: {
+                                ideal: 720
+                            }
+                        }
+                    });
+
+                    if (video) {
+                        video.srcObject = stream;
+                    }
+
+                    if (videoOverlay) {
+                        videoOverlay.classList.add('hidden');
+                    }
+
+                    // Start emotion simulation
+                    simulateEmotionAnalysis();
+
+                    // Navigate to demo section
+                    setActiveSection('demo');
+                } catch (err) {
+                    console.error("Error accessing camera: ", err);
+                    alert(currentLang === 'en' ? "Unable to access camera. Please check permissions." : "تعذر الوصول إلى الكاميرا. يرجى التحقق من الأذونات.");
+                }
+            }
+
+            function stopCamera() {
+                if (stream) {
+                    stream.getTracks().forEach(track => track.stop());
+
+                    if (video) {
+                        video.srcObject = null;
+                    }
+
+                    if (videoOverlay) {
+                        videoOverlay.classList.remove('hidden');
+                    }
+
+                    // Stop emotion simulation
+                    if (emotionInterval) {
+                        clearInterval(emotionInterval);
+                        emotionInterval = null;
+                    }
+                    if (analysisInterval) {
+                        clearInterval(analysisInterval);
+                        analysisInterval = null;
+                    }
+                }
+            }
+
+            function takeSnapshot() {
+                if (!stream) return;
+
+                const canvas = document.createElement('canvas');
+                const context = canvas.getContext('2d');
+                canvas.width = video.videoWidth;
+                canvas.height = video.videoHeight;
+                context.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+                const link = document.createElement('a');
+                link.download = `body-language-analysis-${new Date().getTime()}.png`;
+                link.href = canvas.toDataURL();
+                link.click();
+            }
+
+            // Simulate emotion analysis
+            function simulateEmotionAnalysis() {
+                let index = 0;
+                const currentEmotion = document.getElementById('currentEmotion');
+                const emotionProgress = document.getElementById('emotionProgress');
+
+                // Clear any existing intervals
+                if (emotionInterval) clearInterval(emotionInterval);
+                if (analysisInterval) clearInterval(analysisInterval);
+
+                emotionInterval = setInterval(() => {
+                    if (!stream) return;
+
+                    const emotion = emotions[index];
+
+                    // Update emotion display
+                    if (currentEmotion) {
+                        if (currentLang === 'en') {
+                            currentEmotion.textContent = emotion.name.en;
+                        } else {
+                            currentEmotion.textContent = emotion.name.ar;
+                        }
+                    }
+
+                    // Update progress bar
+                    if (emotionProgress) {
+                        emotionProgress.style.width = `${emotion.value}%`;
+                        emotionProgress.style.backgroundColor = emotion.color;
+                    }
+
+                    // Move to next emotion
+                    index = (index + 1) % emotions.length;
+                }, 3000);
+
+                // Simulate additional analysis data
+                analysisInterval = setInterval(() => {
+                    if (!stream) return;
+
+                    // Randomly update some stats
+                    const confidenceValue = Math.floor(Math.random() * 10) + 85;
+                    const confidenceElement = document.querySelector('.stat-card:nth-child(2) .stat-value');
+                    const confidenceProgress = document.querySelector('.stat-card:nth-child(2) .stat-progress');
+
+                    if (confidenceElement) confidenceElement.textContent = `${confidenceValue}%`;
+                    if (confidenceProgress) confidenceProgress.style.width = `${confidenceValue}%`;
+
+                }, 5000);
+            }
+        }
+
+        // Analytics Tabs
+        function initAnalyticsTabs() {
+            const analyticsTabs = document.querySelectorAll('.analytics-tab');
+
+            analyticsTabs.forEach(tab => {
+                tab.addEventListener('click', function() {
+                    // Remove active class from all tabs
+                    analyticsTabs.forEach(t => t.classList.remove('active'));
+
+                    // Add active class to clicked tab
+                    this.classList.add('active');
+
+                    // Hide all content
+                    document.querySelectorAll('.analytics-content').forEach(content => {
+                        content.classList.remove('active');
+                    });
+
+                    // Show corresponding content
+                    const tabId = this.getAttribute('data-tab');
+                    const contentElement = document.getElementById(`${tabId}-tab`);
+                    if (contentElement) {
+                        contentElement.classList.add('active');
+                    }
+                });
+            });
+        }
+
+        // Theme Toggle
+        const themeToggle = document.querySelector('.theme-toggle');
+        if (themeToggle) {
+            themeToggle.addEventListener('click', () => {
+                document.body.classList.toggle('dark-theme');
+
+                // Update button text and icon
+                const icon = themeToggle.querySelector('i');
+                if (document.body.classList.contains('dark-theme')) {
+                    updateTextContent(themeToggle, 'Light Mode', 'الوضع الفاتح');
+                    icon.classList.remove('fa-moon');
+                    icon.classList.add('fa-sun');
+                } else {
+                    updateTextContent(themeToggle, 'Dark Mode', 'الوضع الداكن');
+                    icon.classList.remove('fa-sun');
+                    icon.classList.add('fa-moon');
+                }
+
+                // Save theme preference
+                localStorage.setItem('theme', document.body.classList.contains('dark-theme') ? 'dark' : 'light');
+            });
+        }
+
+        // Language Toggle
+        const langToggle = document.querySelector('.lang-toggle');
+        if (langToggle) {
+            langToggle.addEventListener('click', () => {
+                currentLang = currentLang === 'en' ? 'ar' : 'en';
+                document.documentElement.lang = currentLang;
+                document.documentElement.dir = currentLang === 'ar' ? 'rtl' : 'ltr';
+
+                // Update all text content
+                updateAllTextContent(currentLang);
+
+                // Update button text
+                updateTextContent(langToggle, 'English', 'English');
+
+                // Save language preference
+                localStorage.setItem('language', currentLang);
+            });
+        }
+
+        // Function to update text content based on language
+        function updateTextContent(element, enText, arText) {
+            const span = element.querySelector('span');
+            if (span) {
+                if (currentLang === 'en') {
+                    span.textContent = enText;
+                } else {
+                    span.textContent = arText;
+                }
+            } else {
+                if (currentLang === 'en') {
+                    element.textContent = enText;
+                } else {
+                    element.textContent = arText;
+                }
+            }
+        }
+
+        // Function to update all text content on the page
+        function updateAllTextContent(lang) {
+            const elements = document.querySelectorAll('[data-en]');
+            elements.forEach(element => {
+                if (lang === 'en') {
+                    element.textContent = element.getAttribute('data-en');
+                } else {
+                    element.textContent = element.getAttribute('data-ar');
+                }
+            });
+        }
+
+        // Load saved preferences
+        function loadPreferences() {
+            // Load theme
+            const savedTheme = localStorage.getItem('theme');
+            if (savedTheme === 'dark') {
+                document.body.classList.add('dark-theme');
+                const icon = themeToggle.querySelector('i');
+                icon.classList.remove('fa-moon');
+                icon.classList.add('fa-sun');
+                updateTextContent(themeToggle, 'Light Mode', 'الوضع الفاتح');
+            }
+
+            // Load language
+            const savedLang = localStorage.getItem('language');
+            if (savedLang && savedLang !== 'ar') {
+                currentLang = savedLang;
+                document.documentElement.lang = currentLang;
+                document.documentElement.dir = currentLang === 'ar' ? 'rtl' : 'ltr';
+                updateAllTextContent(currentLang);
+                updateTextContent(langToggle, 'English', 'English');
+            }
+        }
+
+        // Real-time data simulation for analytics
+        function initRealTimeData() {
+            setInterval(() => {
+                const analyticsSection = document.getElementById('analytics');
+                if (analyticsSection && analyticsSection.classList.contains('active')) {
+                    updateLiveChartData();
+                }
+            }, 5000);
+        }
+
+        function updateLiveChartData() {
+            // Simulate updating chart data in real-time
+            const randomIncrement = () => Math.random() * 10 - 5;
+
+            // Update emotions chart
+            if (charts.emotionsChart) {
+                charts.emotionsChart.data.datasets[0].data = charts.emotionsChart.data.datasets[0].data.map(
+                    value => Math.max(5, Math.min(95, value + randomIncrement()))
+                );
+                charts.emotionsChart.update('none');
+            }
+        }
+
+        console.log('Body Language Analysis System initialized successfully');
+    </script>
+</body>
+
+</html>
